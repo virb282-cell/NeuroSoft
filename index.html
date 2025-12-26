@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="hi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,11 +14,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
   <style>
-    .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-    .fade-in { animation: fadeIn 1s ease-in; }
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .fade-in {
+      animation: fadeIn 1s ease-in;
+    }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   </style>
 
@@ -54,20 +68,17 @@
     }
 
     // 3) SheetDB – Google Sheet me data save
-    function saveUserToSheetDB(payload) {
-      fetch("https://sheetdb.io/api/v1/x6ncgjj4jakbe", { // 👈 apna SheetDB URL
+    // 3) Google Apps Script – Direct Google Sheet
+    function saveUserToGoogleSheet(payload) {
+      fetch("https://script.google.com/macros/s/AKfycbw1n8VZUSkbzJiTXQRjdtssq7gjhoHmSbRT91R_eADCKlaBIrF_cYiD6tWLOob3Vlma/exec", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ data: payload }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log("✅ SheetDB response:", data);
-        })
-        .catch((err) => {
-          console.log("❌ SheetDB error:", err);
-        });
+        body: JSON.stringify(payload)
+      });
+
     }
+
+
+
 
     // 4) Global vars + helper
     let razorpayInstance;
@@ -75,9 +86,9 @@
 
     function generateReferralCode() {
       return (
-        "DMPRO-" +
+        "NS" +
         Math.random().toString(36).substr(2, 4).toUpperCase() +
-        "-" +
+        " " +
         Date.now().toString().slice(-6)
       );
     }
@@ -117,6 +128,7 @@
           const name = document.getElementById("name").value;
           const email = document.getElementById("email").value;
           const mobile = document.getElementById("mobile").value;
+          const upiId = document.getElementById("upi_id").value;
           const referral =
             document.getElementById("referral").value || "None";
 
@@ -126,18 +138,26 @@
             key: "rzp_live_RrYmfVoCZvjvLM", // 👈 apna Razorpay key
             amount: 100,                   // paise (₹1 = 100 paise)
             currency: "INR",
-            name: "DigitalPro Academy",
-            description: "Digital Marketing Master Course",
+            name: "NeuroSoft",
+            description: "NeuroSoft Master Course",
             image: "https://your-logo-url.com/logo.png",
+
+
+
+
+
             handler: function (response) {
-              // 1) SheetDB – Google Sheet me store
-              saveUserToSheetDB({
-                name: name,                            // Sheet header: name
-                email: email,                          // email
-                mobile: mobile,                        // mobile
-                referral_input: referral,              // referral_input
-                referral_generated: currentReferralCode, // referral_generated
-                razorpay_payment_id: response.razorpay_payment_id, // razorpay_payment_id
+
+
+              // 1) Google Sheet (Apps Script) me save
+              saveUserToGoogleSheet({
+                name: name,
+                email: email,
+                mobile: mobile,
+                referralInput: referral,
+                referralGenerated: currentReferralCode,
+                razorpay_payment_id: response.razorpay_payment_id,
+                upi_id: upiId
               });
 
               // 2) Email
@@ -146,6 +166,8 @@
               // 3) UI
               showSuccessModal(currentReferralCode);
             },
+
+
             prefill: {
               name: name,
               email: email,
@@ -177,7 +199,7 @@
   <!-- Landing Page -->
   <div id="landing" class="min-h-screen gradient-bg text-white">
     <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <div class="text-2xl font-bold">DigitalPro Academy</div>
+      <div class="text-2xl font-bold">NeuroSoft Academy</div>
       <button onclick="scrollToCourse()"
         class="bg-white text-purple-600 px-6 py-2 rounded-full font-semibold hover:bg-gray-100 transition duration-300">
         View Course
@@ -198,23 +220,20 @@
       </div>
 
       <div class="mt-20 grid md:grid-cols-3 gap-8 text-left">
-        <div
-          class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/20 transition-all duration-300">
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/20 transition-all duration-300">
           <div class="text-4xl mb-4">🎯</div>
           <h3 class="text-2xl font-bold mb-4">Complete Syllabus</h3>
-          <p>SEO, Social Media, Google Ads, Email Marketing, Analytics</p>
+          <p>SEO, Social Media, Google Ads, Email Marketing, Analytics </p>
         </div>
-        <div
-          class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/20 transition-all duration-300">
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/20 transition-all duration-300">
           <div class="text-4xl mb-4">💼</div>
           <h3 class="text-2xl font-bold mb-4">Job Ready</h3>
           <p>Live Projects + Interview Preparation + 100% Placement Support</p>
         </div>
-        <div
-          class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/20 transition-all duration-300">
+        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 hover:bg-white/20 transition-all duration-300">
           <div class="text-4xl mb-4">🔥</div>
           <h3 class="text-2xl font-bold mb-4">Lifetime Access</h3>
-          <p>Course content update + Certificate </p>
+          <p>Course content + Certificate </p>
         </div>
       </div>
     </div>
@@ -267,8 +286,7 @@
   </section>
 
   <!-- Payment Form Modal -->
-  <div id="paymentModal"
-       class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
       <div class="p-8">
         <div class="flex justify-between items-center mb-8">
@@ -280,34 +298,41 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
             <input type="text" id="name" required
-                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
-                   placeholder="Enter your full name">
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+              placeholder="Enter your full name">
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
             <input type="email" id="email" required
-                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
-                   placeholder="your@email.com">
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+              placeholder="your@email.com">
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Mobile Number *</label>
             <input type="tel" id="mobile" required
-                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
-                   placeholder="9876543210">
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+              placeholder="9876543210">
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Referral Code (Optional)</label>
             <input type="text" id="referral"
-                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
-                   placeholder="Enter referral code">
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+              placeholder="Enter referral code">
           </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">UPI ID *</label>
+            <input type="text" id="upi_id" required
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition duration-200"
+              placeholder="example@upi">
+          </div>
+
 
           <div class="pt-4">
             <button type="submit" id="rzp-button"
-                    class="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-purple-900 transform hover:scale-[1.02] transition-all duration-200 shadow-xl">
+              class="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-purple-900 transform hover:scale-[1.02] transition-all duration-200 shadow-xl">
               Pay ₹999 Now
             </button>
           </div>
@@ -317,8 +342,7 @@
   </div>
 
   <!-- Success Modal -->
-  <div id="successModal"
-       class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full text-center p-12">
       <div class="text-6xl mb-6">✅</div>
       <h3 class="text-2xl font-bold text-gray-800 mb-4">Payment Successful!</h3>
@@ -328,19 +352,12 @@
         <div id="refCode" class="text-3xl font-bold text-purple-600 tracking-wider"></div>
       </div>
       <button onclick="hideSuccessModal()"
-              class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition duration-200">
+        class="bg-green-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-green-700 transition duration-200">
         Done
       </button>
     </div>
   </div>
 
 </body>
+
 </html>
-
-
-
-
-
-
-
-
